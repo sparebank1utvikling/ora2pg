@@ -1,0 +1,38 @@
+#docker run --rm --name ora2pg --user $(id -u):0 -v $PWD/admin:/usr/lib/oracle/19.15/client64/network/admin -v $PWD/data:/data -v $PWD/config:/config ora2pg-sb1:latest -- /bin/sh -c 'ora2pg -c config/ora2pg.conf -t INSERT -o /data/insert.sql'
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ora2pg
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsUser: 1707009071
+        # runAsGroup: 1707000513
+        runAsGroup: 0
+      containers:
+      - name: ora2pg
+        image: 404891951966.dkr.ecr.eu-north-1.amazonaws.com/dev/a9705-lab2/default:test4
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 10; ora2pg -c /config/ora2pg.conf -t INSERT"]
+        #command: ["ora2pg", "-c", "/config/ora2pg.conf", "-t", "INSERT"]
+        #command: ["sleep", "600"]
+        volumeMounts:
+        - name: tnsnames-volume
+          mountPath: /usr/lib/oracle/19.15/client64/network/admin/tnsnames.ora
+          subPath: tnsnames.ora
+        - name: ora2pg-config-volume
+          mountPath: /config/ora2pg.conf
+          subPath: ora2pg.conf
+      volumes:
+        - name: tnsnames-volume
+          configMap:
+            items:
+            - key: tnsnames.ora
+              path: tnsnames.ora
+            name: tnsnames
+        - name: ora2pg-config-volume
+          configMap:
+            name: ora2pg
+      restartPolicy: Never
+  backoffLimit: 4
