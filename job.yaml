@@ -6,6 +6,8 @@ metadata:
 spec:
   template:
     spec:
+      automountServiceAccountToken: true
+      serviceAccountName: app
       securityContext:
         runAsUser: 1707009071
         # runAsGroup: 1707000513
@@ -13,8 +15,26 @@ spec:
       containers:
       - name: ora2pg
         image: 404891951966.dkr.ecr.eu-north-1.amazonaws.com/dev/a9705-lab2/default:test4
+        env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: db-conn
+                key: DB_HOST
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: db-conn
+                key: DB_NAME
+          - name: DB_OWNER_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-conn
+                key: DB_OWNER_USER
+          - name: PG_SCHEMA
+            value: businessglossary
         command: ["/bin/sh"]
-        args: ["-c", "sleep 10; ora2pg -c /config/ora2pg.conf --nls_lang AMERICAN_AMERICA.WE8ISO8859P15 -t INSERT; curl -sf -XPOST http://127.0.0.1:15020/quitquitquit"]
+        args: ["-c", "sleep 10; ora2pg -c /config/ora2pg.conf --pg_dsn \"dbi:Pg:dbname=${DB_NAME};host=${DB_HOST};port=5432;sslmode=verify-full\" --pg_user ${DB_OWNER_USER} --pg_pwd $(cat /postgres/.pgpass) --pg_schema ${PG_SCHEMA} --nls_lang AMERICAN_AMERICA.WE8ISO8859P15 -t INSERT; curl -sf -XPOST http://127.0.0.1:15020/quitquitquit"]
         # command: ["sleep", "600"]
         volumeMounts:
         - name: tnsnames-volume
@@ -23,6 +43,33 @@ spec:
         - name: ora2pg-config-volume
           mountPath: /config/ora2pg.conf
           subPath: ora2pg.conf
+        - name: shared-volume
+          mountPath: /postgres      
+      - name: auth
+        image: amazon/aws-cli:2.7.7
+        env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: db-conn
+                key: DB_HOST
+          - name: DB_OWNER_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-conn
+                key: DB_OWNER_USER
+        command:
+          - /bin/bash
+        args:
+          - "-c"
+          - |
+            while true; do
+              HOME=/postgres/ aws rds generate-db-auth-token --region eu-north-1 --hostname ${DB_HOST} --port 5432 --username ${DB_OWNER_USER} > /postgres/.pgpass && chmod 600 /postgres/.pgpass
+              sleep 60
+            done
+        volumeMounts:
+          - name: shared-volume
+            mountPath: /postgres      
       volumes:
         - name: tnsnames-volume
           configMap:
@@ -33,5 +80,7 @@ spec:
         - name: ora2pg-config-volume
           configMap:
             name: ora2pg
+        - name: shared-volume
+          emptyDir: {}
       restartPolicy: Never
   backoffLimit: 4
