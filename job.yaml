@@ -14,9 +14,8 @@ spec:
       - name: ora2pg
         image: 404891951966.dkr.ecr.eu-north-1.amazonaws.com/dev/a9705-lab2/default:test4
         command: ["/bin/sh"]
-        args: ["-c", "sleep 10; ora2pg -c /config/ora2pg.conf -t INSERT"]
-        #command: ["ora2pg", "-c", "/config/ora2pg.conf", "-t", "INSERT"]
-        #command: ["sleep", "600"]
+        args: ["-c", "sleep 10; ora2pg -c /config/ora2pg.conf --nls_lang AMERICAN_AMERICA.WE8ISO8859P15 -t INSERT; curl -sf -XPOST http://127.0.0.1:15020/quitquitquit"]
+        # command: ["sleep", "600"]
         volumeMounts:
         - name: tnsnames-volume
           mountPath: /usr/lib/oracle/19.15/client64/network/admin/tnsnames.ora

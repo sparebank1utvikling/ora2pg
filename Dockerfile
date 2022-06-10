@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
         libdbd-pg-perl
 # passwordfile cannot be empty 
 ADD /assets/passwd /etc/passwd
+RUN chmod g+w /etc/passwd
 RUN mkdir -p /.postgresql/
 ADD /assets/ /assets/
 ADD certs/rds-combined-ca-bundle.pem /tmp/rds-ca/aws-rds-ca-bundle.pem
@@ -39,7 +40,10 @@ RUN cd /tmp/rds-ca && cat aws-rds-ca-bundle.pem|awk 'split_after==1{n++;split_af
 
 
 # Instal Oracle Client
-RUN mkdir /usr/lib/oracle/19.15/client64/network/admin -p
+RUN mkdir /usr/lib/oracle/19.15/client64/network/admin/ora2pg -p
+ADD admin/ora2pg/cwallet.sso /usr/lib/oracle/19.15/client64/network/admin/ora2pg/cwallet.sso
+RUN chown 1707009071.170700513 /usr/lib/oracle/19.15/client64/network/admin/ora2pg/cwallet.sso
+ADD admin/sqlnet.ora /usr/lib/oracle/19.15/client64/network/admin/sqlnet.ora
 VOLUME /usr/lib/oracle/19.15/client64/network/admin
 
 RUN alien -i /assets/oracle-instantclient19.15-basic-19.15.0.0.0-2.x86_64.rpm &&\
