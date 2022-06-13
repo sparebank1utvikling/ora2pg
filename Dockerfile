@@ -44,6 +44,7 @@ RUN mkdir /usr/lib/oracle/19.15/client64/network/admin/ora2pg -p
 ADD admin/ora2pg/cwallet.sso /usr/lib/oracle/19.15/client64/network/admin/ora2pg/cwallet.sso
 RUN chown 1707009071.170700513 /usr/lib/oracle/19.15/client64/network/admin/ora2pg/cwallet.sso
 ADD admin/sqlnet.ora /usr/lib/oracle/19.15/client64/network/admin/sqlnet.ora
+
 VOLUME /usr/lib/oracle/19.15/client64/network/admin
 
 RUN alien -i /assets/oracle-instantclient19.15-basic-19.15.0.0.0-2.x86_64.rpm &&\
