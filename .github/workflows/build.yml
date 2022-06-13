@@ -33,14 +33,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
-
-      # - name: Extract metadata (tags, labels) for Docker
-      #   id: meta
-      #   uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-      #   with:
-      #     images: georgmoser/ora2pg
-      # - name: Print tag name
-      #   run: echo ${{github.ref_name}}
+      
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v2
@@ -50,7 +43,6 @@ jobs:
       - name: Build and push latest
         id: docker_build_and_push_latest
         uses: docker/build-push-action@v2
-        #if: github.ref == 'refs/heads/master'
         with:
           context: .
           push: true
@@ -58,7 +50,6 @@ jobs:
       - name: Build and push tag
         id: docker_build_and_push_tag
         uses: docker/build-push-action@v2
-       # if: startsWith(github.ref, 'refs/tags/')
         with:
           context: .
           push: true
