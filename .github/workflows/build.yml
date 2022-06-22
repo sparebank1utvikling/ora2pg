@@ -40,8 +40,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: sparebank1utvikling/ora2pg:sb1-changes-1
-          #tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Build and Push Latest Docker Image
         id: build-and-push-latest
