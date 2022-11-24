@@ -2075,27 +2075,18 @@ sub _send_to_pgdb
 
 	return if ($self->{oracle_speed});
 
-        my $pg_pwd = $self->{pg_pwd};
         
-        if ($ENV{PG_PASSWORD_FILE}) {
-            open(FH, '<', $ENV{PG_PASSWORD_FILE}) or die $!;
-            $pg_pwd = <FH>;
-            close(FH);
-        }
- 
-	if (!defined $pg_pwd)
+	if (!defined $self->{pg_pwd} && $ENV{PG_PASSWORD_FILE})
 	{
-		eval("use Term::ReadKey;");
-		if (!$@) {
-			$self->{pg_user} = $self->_ask_username('PostgreSQL') unless (defined($self->{pg_user}));
-			$pg_pwd = $self->{pg_pwd} = $self->_ask_password('PostgreSQL');
-		}
+        open(FH, '<', $ENV{PG_PASSWORD_FILE}) or die $!;
+        $self->{pg_pwd} = <FH>;
+        close(FH);
 	}
 
 	$ENV{PGAPPNAME} = 'ora2pg ' || $VERSION;
 
 	# Connect the destination database
-	my $dbhdest = DBI->connect($self->{pg_dsn}, $self->{pg_user}, $pg_pwd, {AutoInactiveDestroy => 1});
+	my $dbhdest = DBI->connect($self->{pg_dsn}, $self->{pg_user}, $self->{pg_pwd}, {AutoInactiveDestroy => 1});
 
 	# Check for connection failure
 	if (!$dbhdest) {
