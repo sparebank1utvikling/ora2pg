@@ -1,4 +1,4 @@
-# ora2pg Docker 
+# ora2pg Docker
 Container image for migrating from oracle to postgresql database.
 
 ## Tags and Releases
