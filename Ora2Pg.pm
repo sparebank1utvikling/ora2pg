@@ -2075,9 +2075,10 @@ sub _send_to_pgdb
 
 	return if ($self->{oracle_speed});
 
-        
+    print "Inside _send_to_pgdb... \n ";
 	if (!defined $self->{pg_pwd} && $ENV{PG_PASSWORD_FILE})
 	{
+        print "Using PG_PASSWORD_FILE... \n";
         open(FH, '<', $ENV{PG_PASSWORD_FILE}) or die $!;
         $self->{pg_pwd} = <FH>;
         close(FH);
