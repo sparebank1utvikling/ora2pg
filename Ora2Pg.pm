@@ -2080,6 +2080,7 @@ sub _send_to_pgdb
         if ($ENV{PG_PASSWORD_FILE}) {
             open(FH, '<', $ENV{PG_PASSWORD_FILE}) or die $!;
             $pg_pwd = <FH>;
+            chomp($pg_pwd);
             close(FH);
         }
  
