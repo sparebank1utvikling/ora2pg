@@ -1,5 +1,5 @@
 # ora2pg Docker 
-Container image for migrating from oracle to postgresql database.
+Container image for migrating from oracle (or mysql/mariadb) to postgresql database.
 
 ## Tags and Releases
 
@@ -8,7 +8,7 @@ Tag names relate to their respective ora2pg [release](https://github.com/darold/
 
 ## Introduction
 
-This container can be used to migrate from Oracle to PostgreSQL utilizing the tool ora2pg.
+This container can be used to migrate from Oracle (or mysql/mariadb) to PostgreSQL utilizing the tool ora2pg.
 
 Documentation: https://ora2pg.darold.net/documentation.html
 
@@ -103,3 +103,12 @@ services:
 
 ## GUI
 If you are looking for a graphical interface for ora2pg, take a look at [visulate-ora2pg](https://github.com/visulate/visulate-ora2pg)
+
+## MySql/MariaDB
+The exact same setup works for MySql/MariaDB as well, the only thing you need to do is to add the parameter
+```
+ --mysql
+```
+to the commands above. For example
+```
+ora2pg --debug --mysql -c /config/ora2pg.conf

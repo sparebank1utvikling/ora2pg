@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
         bzip2 \
         libpq-dev \
         gnupg2 \
+        libmariadb-dev-compat \
+        libmariadb-dev \
+        libdbd-mysql-perl \
         libdbd-pg-perl
 # passwordfile cannot be empty 
 ADD /assets/passwd /etc/passwd
@@ -61,6 +64,7 @@ RUN cpan install Test::NoWarnings &&\
     cpan install DBI &&\
     cpan install DBD::Pg &&\
     cpan install Bundle::Compress::Zlib &&\
+    cpanm install DBD::mysql@4.052 &&\
     cpanm install DBD::Oracle@1.82
 
 # Install ora2pg
