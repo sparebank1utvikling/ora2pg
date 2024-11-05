@@ -1,4 +1,4 @@
-FROM perl:slim
+FROM perl:5.38-slim
 
 ARG ORA2PG_VERSION=24.3
 
