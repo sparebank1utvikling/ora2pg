@@ -16,16 +16,24 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
         # Install postgresql
         postgresql-client \
         # Install mysql
-        libdbd-mysql \
         #install Perl Database Interface
         libdbi-perl \
         bzip2 \
         libpq-dev \
         gnupg2 \
-        libmariadb-dev-compat \
-        libmariadb-dev \
         libdbd-mysql-perl \
-        libdbd-pg-perl
+        libdbd-pg-perl \
+        wget \
+        lsb-release
+
+#see https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-repo-manual-setup
+# and https://github.com/apache/airflow/issues/36231#issuecomment-1856568052
+#trust mysql-packages
+ADD /mysql/RPM-GPG-KEY-mysql-2023  /etc/apt/trusted.gpg.d/mysql2023
+RUN gpg --dearmor /etc/apt/trusted.gpg.d/mysql2023
+ADD /mysql/mysql.list /etc/apt/sources.list.d/mysql.list
+RUN apt update
+RUN apt install -y libmysqlclient-dev
 # passwordfile cannot be empty 
 ADD /assets/passwd /etc/passwd
 RUN chmod g+w /etc/passwd
@@ -35,6 +43,9 @@ ADD certs/rds-combined-ca-bundle.pem /tmp/rds-ca/aws-rds-ca-bundle.pem
 ADD certs/rds-combined-ca-bundle.pem /.postgresql/root.crt
 ADD certs/sb1a-issuing-ca.crt /usr/local/share/ca-certificates/
 ADD certs/sb1a-root-ca.crt /usr/local/share/ca-certificates/
+
+#mysql needs both certificates in the same file
+RUN cat /usr/local/share/ca-certificates/sb1a-issuing-ca.crt /usr/local/share/ca-certificates/sb1a-root-ca.crt >> /usr/local/share/ca-certificates/sb1a-chain.crt
 
 RUN cd /tmp/rds-ca && cat aws-rds-ca-bundle.pem|awk 'split_after==1{n++;split_after=0} /-----END CERTIFICATE-----/ {split_after=1} {print > "cert" n ""}' \
     && for CERT in /tmp/rds-ca/cert*; do mv $CERT /usr/local/share/ca-certificates/aws-rds-ca-$(basename $CERT).crt; done \
@@ -64,7 +75,7 @@ RUN cpan install Test::NoWarnings &&\
     cpan install DBI &&\
     cpan install DBD::Pg &&\
     cpan install Bundle::Compress::Zlib &&\
-    cpanm install DBD::mysql@4.052 &&\
+    cpanm install DBD::mysql &&\
     cpanm install DBD::Oracle@1.82
 
 # Install ora2pg
